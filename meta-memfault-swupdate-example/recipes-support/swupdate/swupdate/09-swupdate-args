@@ -1,0 +1,28 @@
+CONFIG_PATH=/etc/swupdate.cfg
+CONFIG=$(cat $CONFIG_PATH)
+
+# To find your project key, navigate to https://app.memfault.com/ => Settings => General
+PROJECT_KEY=REPLACE_ME
+
+# Please set the following variables to suit your application's needs:
+SOFTWARE_VERSION=1.0.0
+SOFTWARE_TYPE=main
+HARDWARE_VERSION=evt
+# Note: dmi/id/board_serial is not open for reading unless root
+DEVICE_SERIAL=$(cat /sys/devices/virtual/dmi/id/board_serial 2>/dev/null || echo "DEMOSERIAL")
+
+BASE_URL=https://device.memfault.com
+
+if [[ "$CONFIG" == *"\$DEVICE_SERIAL"* ]]; then
+  sed -i \
+  -e "s%\$DEVICE_SERIAL%$DEVICE_SERIAL%g" \
+  -e "s%\$PROJECT_KEY%$PROJECT_KEY%g" \
+  -e "s%\$SOFTWARE_VERSION%$SOFTWARE_VERSION%g" \
+  -e "s%\$SOFTWARE_TYPE%$SOFTWARE_TYPE%g" \
+  -e "s%\$HARDWARE_VERSION%$HARDWARE_VERSION%g" \
+  -e "s%\$BASE_URL%$BASE_URL%g" \
+  $CONFIG_PATH
+fi
+
+SWUPDATE_SURICATTA_ARGS="--polldelay 60"
+SWUPDATE_ARGS="-f $CONFIG_PATH"

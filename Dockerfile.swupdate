@@ -1,0 +1,42 @@
+FROM python:3
+
+# Need to use source later
+SHELL ["/bin/bash", "-c"]
+
+# https://docs.yoctoproject.org/brief-yoctoprojectqs/index.html#build-host-packages
+RUN apt-get -qq update && apt-get -qqy upgrade
+RUN apt-get -qq install -y gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio \
+    python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 \
+    libegl1-mesa libsdl1.2-dev pylint3 xterm python3-subunit mesa-common-dev vim
+
+# Bitbake needs en_US.UTF-8
+RUN apt-get -qq install -y locales
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Can't run bitbake as root, might as well create a user and group now
+RUN groupadd -r yocto && useradd -rm -g yocto -d /home/yocto yocto
+USER yocto
+
+# https://wiki.yoctoproject.org/wiki/Releases
+ARG YOCTO_RELEASE_CODENAME=hardknott
+ARG YOCTO_MACHINE=qemuarm
+
+# https://docs.yoctoproject.org/brief-yoctoprojectqs/index.html#use-git-to-clone-poky
+RUN git clone git://git.yoctoproject.org/poky /home/yocto/poky
+WORKDIR /home/yocto/poky
+RUN git checkout -t origin/$YOCTO_RELEASE_CODENAME -b memfault-yocto-swupdate-test
+
+# https://docs.yoctoproject.org/brief-yoctoprojectqs/index.html#building-your-image
+RUN git clone -b $YOCTO_RELEASE_CODENAME git://git.openembedded.org/meta-openembedded meta-openembedded
+RUN git clone https://github.com/sbabic/meta-swupdate meta-swupdate
+
+COPY meta-memfault-swupdate-example /home/yocto/poky/meta-memfault-swupdate-example
+
+RUN source oe-init-build-env && \
+  bitbake-layers add-layer ~/poky/meta-openembedded/meta-oe && \
+  bitbake-layers add-layer ~/poky/meta-swupdate && \
+  bitbake-layers add-layer ~/poky/meta-memfault-swupdate-example && \
+  MACHINE=$YOCTO_MACHINE bitbake core-image-base
