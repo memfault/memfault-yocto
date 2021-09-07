@@ -2,14 +2,11 @@ software =
 {
     version = "0.1.0";
 
-    qemuarm = {
-        stable : {
-            images: ({
-                    filename = "core-image-base-qemuarm.ext4";
-                    type = "raw";
-                    sha256 = "@core-image-base-qemuarm.ext4";
-                    device = "/dev/mmcblk0p1";
-            });
-        };
-    }
+    images: (
+        {
+            filename = "core-image-base-qemuarm.ext4";
+            type = "raw";
+            device = "/dev/vda";
+        }
+    );
 }

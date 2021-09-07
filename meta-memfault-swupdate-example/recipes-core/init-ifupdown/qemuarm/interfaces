@@ -1,0 +1,7 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+dns-search google.com
+dns-nameservers 8.8.8.8

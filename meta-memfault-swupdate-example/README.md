@@ -1,5 +1,8 @@
 # meta-memfault-swupdate-example
 
+> ⚠️ This repository is a configuration example. For your own project, we
+> recommend that you fork this repository and modify it to fit your needs.
+
 This repository is based on [sbabic/meta-swupdate-boards][1] and contains
 [Memfault][2]-specific [Yocto][3] setups to run [SWUpdate][4] in [Suricatta
 daemon mode][5], using Memfault's OTA capabilities as a payload server.
@@ -41,10 +44,7 @@ A full setup that uses this layer can be found in
 
 ## Usage
 
-> This repository is a configuration example. For your own project, we recommend
-> that you fork this repository and modify it to fit your needs.
-
-This layer contains two recipes: `swupdate` and `update-image`.
+This layer contains two main recipes: `swupdate` and `update-image`.
 
 To build a valid `.swu` file for your device, run:
 
@@ -84,3 +84,8 @@ this, it's useful to [read SWUpdate's documentation page on
 `sw-description`][6].
 
 [6]: https://sbabic.github.io/swupdate/sw-description.html
+
+### Other recipes
+
+- `recipes-core/init-ifupdown`: overrides `/etc/network/interfaces` to make DNS
+  work inside QEMU.
